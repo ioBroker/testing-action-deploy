@@ -11,8 +11,9 @@ Shared Github Actions for ioBroker testing workflows: Deploy step
 | `package-cache`   | For which package manager dependencies should be cached. Set to `'false'` or `''` to disable caching. More documentation [here](https://github.com/actions/setup-node#caching-global-packages-data). | ❌        |      `'npm'`      |
 | `build`           | Set to `'true'` when the adapter needs a build step before testing                                                                                                                                   | ❌        |      `false`      |
 | `build-command`   | Overwrite the default build command                                                                                                                                                                  | ❌        | `'npm run build'` |
-| `npm-token`       | The token to use to publish to npm                                                                                                                                                                   | ✔         |         -         |
+| `npm-token`       | The token to use to publish to npm                                                                                                                                                                   | ❌        | (see below)       |
 | `github-token`    | The token to use to create a GitHub release                                                                                                                                                          | ✔         |         -         |
+If no npm.token is set, trusted publishing must be set up.
 
 If Sentry integration is desired, the following inputs are used to configure it:
 
