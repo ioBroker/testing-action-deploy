@@ -100,6 +100,7 @@ runs:
       run: |
         if [[ "${{ inputs.npm-token }}" == "" ]]; then
           echo "using trusted installer ..."
+          # ensure that newest npm is installed - otherwise trusted installer does not work
           npm install -g npm@latest
           npm -v
         else
@@ -160,6 +161,7 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
+
 
 
 
