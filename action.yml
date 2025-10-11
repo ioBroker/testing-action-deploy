@@ -20,7 +20,7 @@ inputs:
     default: "npm run build"
   npm-token:
     description: "The token to use to publish to npm"
-    required: false
+    default: ''
   github-token:
     description: "The token to use to create a GitHub release"
     required: true
@@ -98,7 +98,7 @@ runs:
     - name: Publish package to npm
       shell: bash
       run: |
-        if ${{ inputs.npm-token }}; then
+        if [["${{ inputs.npm-token }}" == "" ]]; then
           echo "using npm-token ..."
           npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
         else
@@ -159,4 +159,5 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
+
 
