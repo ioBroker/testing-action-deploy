@@ -98,12 +98,12 @@ runs:
     - name: Publish package to npm
       shell: bash
       run: |
-        if [["${{ inputs.npm-token }}" != "" ]]; then
+        if [[ "${{ inputs.npm-token }}" == "" ]]; then
+          echo "using trusted installer ..."
+          ### npm config set //registry.npmjs.org/
+        else
           echo "using npm-token ..."
           npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
-        else
-          echo "using trusted installer ..."
-          npm config set //registry.npmjs.org/
         fi
         npm whoami
         npm publish ${{ steps.extract_release.outputs.TAG }}
@@ -159,6 +159,7 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
+
 
 
 
