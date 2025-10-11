@@ -98,7 +98,7 @@ runs:
     - name: Publish package to npm
       shell: bash
       run: |
-        if [["${{ inputs.npm-token }}" == "" ]]; then
+        if [["${{ inputs.npm-token }}" != "" ]]; then
           echo "using npm-token ..."
           npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
         else
@@ -159,5 +159,6 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
+
 
 
