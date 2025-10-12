@@ -54,7 +54,7 @@ jobs:
         with:
           node-version: "14.x" # This should be LTS
           # build: 'true' # optional
-          npm-token: ${{ secrets.NPM_TOKEN }} # This must be created on https://www.npmjs.com in your profile under "Access Tokens".
+          npm-token: ${{ secrets.NPM_TOKEN }} # This must be created on https://www.npmjs.com in your profile under "Access Tokens". Omit this line if trusted publishing is activated.
           github-token: ${{ secrets.GITHUB_TOKEN }} # This exists by default in Github Actions and does not need to be created.
           # If you want Sentry:
           sentry: true
