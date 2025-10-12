@@ -47,6 +47,7 @@ jobs:
 
     # Write permissions are required to create Github releases
     permissions:
+      id-token: write
       contents: write
 
     steps:
@@ -63,3 +64,26 @@ jobs:
           sentry-version-prefix: "iobroker.my-adapter"
           # ... other options
 ```
+
+## Usage of TRUSTED PUBLISHING
+
+npm recommends to use trusted publishing. As npm tokens are no longer available for more than 90 days, trusted publishing is the only way to configure a permanent solution.
+Please follow the official [guide to set up trusted publishing for github](https://docs.npmjs.com/trusted-publishers#configuring-trusted-publishing).
+
+After setting up the configuration at npmjs please ensure that your workflow has been adapted as following:
+- the following permissions are set at workflow test-and.release.yml
+  ```
+  permissions:
+      id-token: write
+      contents: write
+  ```
+  
+- a npm-token is NOT provided
+  ```
+  - uses: ioBroker/testing-action-deploy@v1
+    with:
+      node-version: "14.x" # This should be LTS
+      # build: 'true' # optional
+      npm-token: ${{ secrets.NPM_TOKEN }} # This must be created on https://www.npmjs.com in your profile under "Access Tokens". Omit this line if trusted publishing is activated.
+      github-token: ${{ secrets.GITHUB_TOKEN }} # This exists by default in Github Actions and does not need to be created.
+  ```
