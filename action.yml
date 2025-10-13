@@ -20,7 +20,7 @@ inputs:
     default: "npm run build"
   npm-token:
     description: "The token to use to publish to npm"
-    required: true
+    default: ''
   github-token:
     description: "The token to use to create a GitHub release"
     required: true
@@ -98,8 +98,16 @@ runs:
     - name: Publish package to npm
       shell: bash
       run: |
-        npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
-        npm whoami
+        if [[ "${{ inputs.npm-token }}" == "" ]]; then
+          echo "using trusted installer ..."
+          # ensure that newest npm is installed - otherwise trusted installer does not work
+          npm install -g npm@latest
+          npm -v
+        else
+          echo "using npm-token ..."
+          npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
+          npm whoami
+        fi
         npm publish ${{ steps.extract_release.outputs.TAG }}
 
     - name: Create Github Release
@@ -153,3 +161,9 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
+
+
+
+
+
+
