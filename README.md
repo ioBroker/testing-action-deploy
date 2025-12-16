@@ -13,7 +13,7 @@ Shared GitHub Actions for ioBroker testing workflows: Deploy step
 | `build-command`   | Overwrite the default build command                                                                                                                                                                  | ❌         |                       `'npm run build'`                        |
 | `npm-token`       | The token to use to publish to npm                                                                                                                                                                   | ❌         | If npm-token is not set, trusted publishing must be activated. |
 | `github-token`    | The token to use to create a GitHub release                                                                                                                                                          | ✔         |                               -                                |
-| `tag`             | You can provide the custom tag (without starting "v") to release under this tag and not by `github.ref`                                                                                              | ✔         |                               -                                |
+| `tag`             | You can provide the custom tag (without starting "v") to release under this tag and not by `github.ref`                                                                                              | ❌         |                               -                                |
 
 
 If Sentry integration is desired, the following inputs are used to configure it:
