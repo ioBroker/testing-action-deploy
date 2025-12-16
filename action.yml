@@ -11,7 +11,7 @@ inputs:
     default: "npm ci"
   package-cache:
     description: "Define which package manager to use for dependency caching. Set to 'false' to disable caching."
-    default: 'npm'
+    default: "npm"
   build:
     description: "Set to true when the adapter needs a build step"
     default: "false"
@@ -20,7 +20,10 @@ inputs:
     default: "npm run build"
   npm-token:
     description: "The token to use to publish to npm"
-    required: true
+    default: ""
+  tag:
+    description: "Optional tag to publish the package under"
+    default: ""
   github-token:
     description: "The token to use to create a GitHub release"
     default: ""
@@ -70,7 +73,15 @@ runs:
       id: extract_release
       # The body may be multiline, therefore newlines and % need to be escaped
       run: |
-        VERSION="${{ github.ref }}"
+        # compute TAG_REF: use inputs.tag if provided, otherwise github.ref
+        if [[ "${{ inputs.tag }}" != "" ]]; then
+          TAG_REF="v${{ inputs.tag }}"
+          VERSION="${{ inputs.tag }}"
+        else
+          TAG_REF="${{ github.ref }}"
+          VERSION="${{ github.ref }}"
+        fi
+        echo "TAG_REF=$TAG_REF" >> $GITHUB_OUTPUT
         VERSION=${VERSION##*/v}
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         EOF=$(od -An -N6 -x /dev/urandom | tr -d ' ')
@@ -98,20 +109,27 @@ runs:
     - name: Publish package to npm
       shell: bash
       run: |
-        npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
-        npm whoami
+        if [[ "${{ inputs.npm-token }}" == "" ]]; then
+          echo "using trusted installer ..."
+          # ensure that newest npm is installed - otherwise trusted installer does not work
+          npm install -g npm@latest
+          npm -v
+        else
+          echo "using npm-token ..."
+          npm config set //registry.npmjs.org/:_authToken=${{ inputs.npm-token }}
+          npm whoami
+        fi
         npm publish ${{ steps.extract_release.outputs.TAG }}
 
     - name: Create Github Release
-      if: ${{ inputs.github-token != '' }}
-      uses: softprops/action-gh-release@master
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ steps.extract_release.outputs.TAG_REF }}
         name: Release v${{ steps.extract_release.outputs.VERSION }}
         draft: false
-        # Prerelease versions create prereleases on Github
+        # Prerelease versions create prereleases on GitHub
         prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
         body: ${{ steps.extract_release.outputs.BODY }}
 
