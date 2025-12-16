@@ -1,6 +1,6 @@
 # testing-action-deploy
 
-Shared Github Actions for ioBroker testing workflows: Deploy step
+Shared GitHub Actions for ioBroker testing workflows: Deploy step
 
 ## Inputs
 
@@ -17,16 +17,16 @@ Shared Github Actions for ioBroker testing workflows: Deploy step
 
 If Sentry integration is desired, the following inputs are used to configure it:
 
-| Input                       | Description                                                                                | Required?             |            Default            |
-| --------------------------- | ------------------------------------------------------------------------------------------ | --------------------- | :---------------------------: |
-| `sentry`                    | Set to `'true'` to enable Sentry releases integration                                      | ❌                    |            `false`            |
-| `sentry-token`              | The token to use to create a Sentry release                                                | if `sentry` is `true` |               -               |
-| `sentry-url`                | Under which URL the Sentry instance is running                                             | ❌                    | `https://sentry.iobroker.net` |
-| `sentry-org`                | Which Sentry organization the project is under                                             | ❌                    |          `iobroker`           |
-| `sentry-project`            | The project name on Sentry                                                                 | if `sentry` is `true` |               -               |
-| `sentry-version-prefix`     | The prefix for release versions on Sentry. Should be something like `iobroker.adaptername` | if `sentry` is `true` |               -               |
-| `sentry-github-integration` | Set to true once Github integration is set up in Sentry                                    | ❌                    |            `false`            |
-| `sentry-sourcemap-paths`    | If sourcemaps should be uploaded to Sentry, specify their path here                        | ❌                    |               -               |
+| Input                       | Description                                                                                | Required?             |                     Default   |
+|-----------------------------|--------------------------------------------------------------------------------------------|-----------------------|-------------------------------|
+| `sentry`                    | Set to `'true'` to enable Sentry releases integration                                      | ❌                     | `false`                       |
+| `sentry-token`              | The token to use to create a Sentry release                                                | if `sentry` is `true` | -                             |
+| `sentry-url`                | Under which URL the Sentry instance is running                                             | ❌                     | `https://sentry.iobroker.net` |
+| `sentry-org`                | Which Sentry organization the project is under                                             | ❌                     | `iobroker`                    |
+| `sentry-project`            | The project name on Sentry                                                                 | if `sentry` is `true` | -                             |
+| `sentry-version-prefix`     | The prefix for release versions on Sentry. Should be something like `iobroker.adaptername` | if `sentry` is `true` | -                             |
+| `sentry-github-integration` | Set to true once Github integration is set up in Sentry                                    | ❌                     | `false`                       |
+| `sentry-sourcemap-paths`    | If sourcemaps should be uploaded to Sentry, specify their path here                        | ❌                     | -                             |
 
 ## Usage
 
@@ -45,7 +45,7 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    # Write permissions are required to create Github releases
+    # Write permissions are required to create GitHub releases
     permissions:
       id-token: write
       contents: write
@@ -53,10 +53,10 @@ jobs:
     steps:
       - uses: ioBroker/testing-action-deploy@v1
         with:
-          node-version: "14.x" # This should be LTS
+          node-version: "22.x" # This should be LTS
           # build: 'true' # optional
           npm-token: ${{ secrets.NPM_TOKEN }} # This must be created on https://www.npmjs.com in your profile under "Access Tokens". Omit this line if trusted publishing is activated.
-          github-token: ${{ secrets.GITHUB_TOKEN }} # This exists by default in Github Actions and does not need to be created.
+          github-token: ${{ secrets.GITHUB_TOKEN }} # This exists by default in GitHub Actions and does not need to be created.
           # If you want Sentry:
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
@@ -70,19 +70,19 @@ jobs:
 npm recommends to use trusted publishing. As npm tokens are no longer available for more than 90 days, trusted publishing is the only way to configure a permanent solution.
 Please follow the official [guide to set up trusted publishing for github](https://docs.npmjs.com/trusted-publishers#configuring-trusted-publishing).
 
-After setting up the configuration at npmjs please ensure that your workflow has been adapted as following:
+After setting up the configuration at npmjs.com please ensure that your workflow has been adapted as following:
 - the following permissions are set at workflow test-and.release.yml
-  ```
+  ```yml
   permissions:
       id-token: write
       contents: write
   ```
   
 - a npm-token is NOT provided
-  ```
+  ```yml
   - uses: ioBroker/testing-action-deploy@v1
     with:
-      node-version: "14.x" # This should be LTS
+      node-version: "22.x" # This should be LTS
       # build: 'true' # optional
       npm-token: ${{ secrets.NPM_TOKEN }} # This must be created on https://www.npmjs.com in your profile under "Access Tokens". Omit this line if trusted publishing is activated.
       github-token: ${{ secrets.GITHUB_TOKEN }} # This exists by default in Github Actions and does not need to be created.
