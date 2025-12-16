@@ -1,6 +1,6 @@
 name: "ioBroker Testing: Deploy"
 author: "AlCalzone"
-#description: 'Greet someone'
+description: "Shared GitHub Actions for ioBroker testing workflows: Deploy step"
 
 inputs:
   node-version:
@@ -11,26 +11,29 @@ inputs:
     default: "npm ci"
   package-cache:
     description: "Define which package manager to use for dependency caching. Set to 'false' to disable caching."
-    default: 'npm'
+    default: "npm"
   build:
     description: "Set to true when the adapter needs a build step"
-    default: false
+    default: "false"
   build-command:
     description: "Overwrite the default build command"
     default: "npm run build"
   npm-token:
     description: "The token to use to publish to npm"
-    default: ''
+    default: ""
+  tag:
+    description: "Optional tag to publish the package under"
+    default: ""
   github-token:
     description: "The token to use to create a GitHub release"
     required: true
 
   sentry:
     description: "Enable Sentry releases integration"
-    default: false
+    default: "false"
   sentry-token:
     description: "The token to use to create a Sentry release"
-    default: false
+    default: "false"
   sentry-url:
     description: "Under which URL the Sentry instance is running"
     default: "https://sentry.iobroker.net"
@@ -39,16 +42,16 @@ inputs:
     default: "iobroker"
   sentry-project:
     description: "The project name on Sentry"
-    default: false
+    default: "false"
   sentry-version-prefix:
     description: "The prefix for release versions on Sentry"
-    default: false
+    default: "false"
   sentry-github-integration:
     description: "Set to true once Github integration is set up in Sentry"
-    default: false
+    default: "false"
   sentry-sourcemap-paths:
     description: "If sourcemaps should be uploaded to Sentry, specify their path here"
-    default: false
+    default: "false"
 
 # Conditional syntax isn't supported, but there are workarounds:
 # https://github.com/actions/runner/issues/834#issuecomment-909921245
@@ -70,7 +73,15 @@ runs:
       id: extract_release
       # The body may be multiline, therefore newlines and % need to be escaped
       run: |
-        VERSION="${{ github.ref }}"
+        # compute TAG_REF: use inputs.tag if provided, otherwise github.ref
+        if [[ "${{ inputs.tag }}" != "" ]]; then
+          TAG_REF="${{ inputs.tag }}"
+          VERSION="${{ inputs.tag }}"
+        else
+          TAG_REF="${{ github.ref }}"
+          VERSION="${{ github.ref }}"
+        fi
+        echo "TAG_REF=$TAG_REF" >> $GITHUB_OUTPUT
         VERSION=${VERSION##*/v}
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         EOF=$(od -An -N6 -x /dev/urandom | tr -d ' ')
@@ -115,10 +126,10 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: ${{ steps.extract_release.outputs.TAG_REF }}
         name: Release v${{ steps.extract_release.outputs.VERSION }}
         draft: false
-        # Prerelease versions create prereleases on Github
+        # Prerelease versions create prereleases on GitHub
         prerelease: ${{ contains(steps.extract_release.outputs.VERSION, '-') }}
         body: ${{ steps.extract_release.outputs.BODY }}
 
@@ -161,10 +172,3 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
-
-
-
-
-
-
-
