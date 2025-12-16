@@ -75,7 +75,7 @@ runs:
       run: |
         # compute TAG_REF: use inputs.tag if provided, otherwise github.ref
         if [[ "${{ inputs.tag }}" != "" ]]; then
-          TAG_REF="${{ inputs.tag }}"
+          TAG_REF="v${{ inputs.tag }}"
           VERSION="${{ inputs.tag }}"
         else
           TAG_REF="${{ github.ref }}"
@@ -122,7 +122,7 @@ runs:
         npm publish ${{ steps.extract_release.outputs.TAG }}
 
     - name: Create Github Release
-      uses: softprops/action-gh-release@v2.4.2
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       with:
