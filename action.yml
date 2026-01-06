@@ -154,7 +154,7 @@ runs:
           exit 1
         fi
 
-        npm i -g @sentry/cli
+        npm i -g @sentry/cli@2.58.4
 
         export SENTRY_AUTH_TOKEN=${{ inputs.sentry-token }}
         export SENTRY_URL=${{ inputs.sentry-url }}
@@ -172,3 +172,4 @@ runs:
         fi
 
         sentry-cli releases finalize $SENTRY_VERSION
+
