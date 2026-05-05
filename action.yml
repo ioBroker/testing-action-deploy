@@ -60,10 +60,10 @@ runs:
   using: "composite"
   steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Use Node.js ${{ inputs.node-version }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ (inputs.package-cache != 'false' && inputs.package-cache != '') && inputs.package-cache || '' }}
@@ -122,7 +122,7 @@ runs:
         npm publish ${{ steps.extract_release.outputs.TAG }}
 
     - name: Create Github Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       with:
