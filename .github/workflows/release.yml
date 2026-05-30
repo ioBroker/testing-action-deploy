@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (semver format: X.Y.Z)'
+        required: true
+        type: string
+
+jobs:
+  validate-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      VERSION: ${{ github.event.inputs.version }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate semver format
+        run: |
+          # Validate semver format (X.Y.Z where X, Y, Z are numbers)
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Error: Version must be in semver format (X.Y.Z)"
+            echo "Provided: $VERSION"
+            exit 1
+          fi
+
+          echo "Version $VERSION is valid"
+
+      - name: Check if tag already exists
+        run: |
+          # Fetch all tags from remote to ensure we have the latest
+          git fetch --tags
+
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "Error: Tag v$VERSION already exists"
+            exit 1
+          fi
+          echo "Tag v$VERSION does not exist, proceeding with release"
+
+      - name: Create and push tags
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Parse version components
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+          MINOR=$(echo "$VERSION" | cut -d. -f1-2)
+          PATCH="$VERSION"
+          
+          # Create array of tags to manage
+          TAGS=("v$PATCH" "v$MINOR" "v$MAJOR")
+          
+          echo "Creating/updating tags for version $VERSION:"
+          echo "  - v$PATCH (full version)"
+          echo "  - v$MINOR (major.minor)"
+          echo "  - v$MAJOR (major only)"
+          
+          # Fetch remote tags once for efficiency
+          REMOTE_TAGS=$(git ls-remote --tags origin)
+          
+          # Track tags to delete remotely
+          TAGS_TO_DELETE=()
+          
+          # Create/update each tag locally
+          for tag in "${TAGS[@]}"; do
+            # For the full version tag, just create it (we already verified it doesn't exist)
+            if [ "$tag" = "v$PATCH" ]; then
+              echo "Creating tag: $tag"
+              git tag -a "$tag" -m "Release v$VERSION"
+            else
+              # For major and minor tags, delete if exists and recreate
+              # Check if tag exists locally and delete it
+              if [ -n "$(git tag -l "$tag")" ]; then
+                echo "Deleting existing local tag: $tag"
+                git tag -d "$tag"
+              fi
+              
+              # Check if tag exists remotely and mark for deletion
+              if echo "$REMOTE_TAGS" | grep -q "refs/tags/$tag$"; then
+                echo "Marking remote tag for deletion: $tag"
+                TAGS_TO_DELETE+=("$tag")
+              fi
+              
+              # Create new tag
+              echo "Creating/updating tag: $tag"
+              git tag -a "$tag" -m "Release v$VERSION"
+            fi
+          done
+          
+          # Delete remote tags in batch if any need to be deleted
+          if [ ${#TAGS_TO_DELETE[@]} -gt 0 ]; then
+            echo "Deleting remote tags: ${TAGS_TO_DELETE[*]}"
+            git push --delete origin "${TAGS_TO_DELETE[@]}"
+          fi
+          
+          # Push all newly created tags in batch (force push to handle recreation)
+          echo "Pushing tags to remote: ${TAGS[*]}"
+          git push --force origin "${TAGS[@]}"
+          
+          echo "Tags created/updated successfully!"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          name: Release v${{ github.event.inputs.version }}
+          draft: false
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
