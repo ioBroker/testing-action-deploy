@@ -112,7 +112,7 @@ runs:
         if [[ "${{ inputs.npm-token }}" == "" ]]; then
           echo "using trusted installer ..."
           # ensure that newest npm is installed - otherwise trusted installer does not work
-          npm install -g npm@latest
+          npm install -g npm@11
           npm -v
         else
           echo "using npm-token ..."
