@@ -63,7 +63,7 @@ runs:
       uses: actions/checkout@v7
 
     - name: Use Node.js ${{ inputs.node-version }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ inputs.node-version }}
         cache: ${{ (inputs.package-cache != 'false' && inputs.package-cache != '') && inputs.package-cache || '' }}
